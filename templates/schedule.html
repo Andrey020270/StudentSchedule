@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Моё расписание{% endblock %}
+{% block content %}
+
+<h2>Моё расписание</h2>
+
+<form method="GET" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label class="form-label">Дата</label>
+        <input type="date" name="date" value="{{ selected_date or '' }}" class="form-control">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Предмет</label>
+        <select name="subject" class="form-select">
+            <option value="all">Все</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.id }}"
+                    {% if selected_subject == subject.id|string %}selected{% endif %}>
+                    {{ subject.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Преподаватель</label>
+        <select name="teacher" class="form-select">
+            <option value="all">Все</option>
+            {% for teacher in teachers %}
+                <option value="{{ teacher.id }}"
+                    {% if selected_teacher == teacher.id|string %}selected{% endif %}>
+                    {{ teacher.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3 align-self-end">
+        <button type="submit" class="btn btn-primary">Фильтровать</button>
+        <a href="{{ url_for('schedule') }}" class="btn btn-secondary">Сбросить</a>
+    </div>
+</form>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Время</th>
+            <th>Предмет</th>
+            <th>Аудитория</th>
+            <th>Преподаватель</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+        <tr>
+            <td>{{ event.date }}</td>
+            <td>{{ event.time }}</td>
+            <td>{{ event.subject.name if event.subject else '—' }}</td>
+            <td>{{ event.room.number if event.room else '—' }}</td>
+            <td>{{ event.teacher.name if event.teacher else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" class="text-center">Нет событий</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
