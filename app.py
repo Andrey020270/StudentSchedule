@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 from models import User, Event, Subject, Teacher
+import datetime
 
 app = Flask(__name__)
 
@@ -12,7 +13,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dummy_secret')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'DATABASE_URL',
-    'mysql+pymysql://user:password@localhost/olympiad_schedule'
+    'sqlite:///schedule.db'
 )
 db.init_app(app)
 
@@ -101,7 +102,6 @@ def schedule():
                            selected_teacher=selected_teacher)
 
 
-# Пример защищённого маршрута для добавления событий (только организатор/админ)
 @app.route('/add_event', methods=['GET', 'POST'])
 @login_required
 def add_event():
@@ -111,45 +111,17 @@ def add_event():
 
     if request.method == 'POST':
         title = request.form['title']
-        date = request.form['date']
-        time = request.form['time']
-        stage = request.form['stage']
-        subject_id = request.form['subject']
-        teacher_id = request.form['teacher']
-        room_id = request.form['room']
-        user_id = request.form['user']
 
-        new_event = Event(
-            title=title,
-            date=date,
-            time=time,
-            stage=stage,
-            subject_id=subject_id,
-            teacher_id=teacher_id,
-            room_id=room_id,
-            user_id=user_id
-        )
-        db.session.add(new_event)
-        db.session.commit()
-        flash("Событие успешно добавлено")
-        return redirect(url_for('schedule'))
+        # Дата
+        date = datetime.datetime.strptime(request.form['date'], "%Y-%m-%d").date()
 
-    subjects = Subject.query.all()
-    teachers = Teacher.query.all()
-    return render_template('add_event.html', subjects=subjects, teachers=teachers)
+        # Время (поддержка HH:MM и HH:MM:SS)
+        time_str = request.form['time']
+        try:
+            time = datetime.datetime.strptime(time_str, "%H:%M:%S").time()
+        except ValueError:
+            time = datetime.datetime.strptime(time_str, "%H:%M").time()
 
-
-@app.route('/add_event', methods=['GET', 'POST'])
-@login_required
-def add_event():
-    if current_user.role not in ["organizer", "admin"]:
-        flash("Недостаточно прав для добавления событий")
-        return redirect(url_for('schedule'))
-
-    if request.method == 'POST':
-        title = request.form['title']
-        date = request.form['date']
-        time = request.form['time']
         stage = request.form['stage']
         subject_id = request.form['subject']
         teacher_id = request.form['teacher']
@@ -190,8 +162,15 @@ def edit_event(id):
 
     if request.method == 'POST':
         event.title = request.form['title']
-        event.date = request.form['date']
-        event.time = request.form['time']
+        event.date = datetime.datetime.strptime(request.form['date'], "%Y-%m-%d").date()
+
+        # Время (поддержка HH:MM и HH:MM:SS)
+        time_str = request.form['time']
+        try:
+            event.time = datetime.datetime.strptime(time_str, "%H:%M:%S").time()
+        except ValueError:
+            event.time = datetime.datetime.strptime(time_str, "%H:%M").time()
+
         event.stage = request.form['stage']
         event.subject_id = request.form['subject']
         event.teacher_id = request.form['teacher']
@@ -207,8 +186,14 @@ def edit_event(id):
     from models import Room
     rooms = Room.query.all()
     users = User.query.filter_by(role="participant").all()
-    return render_template('edit_event.html', event=event, subjects=subjects, teachers=teachers, rooms=rooms,
-                           users=users)
+    return render_template(
+        'edit_event.html',
+        event=event,
+        subjects=subjects,
+        teachers=teachers,
+        rooms=rooms,
+        users=users
+    )
 
 
 @app.route('/delete_event/<int:id>', methods=['POST', 'GET'])

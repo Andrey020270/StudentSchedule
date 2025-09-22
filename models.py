@@ -8,10 +8,11 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
-    role = db.Column(db.String(50), nullable=False, default="participant")  # participant, organizer, admin
+    role = db.Column(db.String(50), nullable=False, default="participant")
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))  # 🔹 вот этого не хватало
 
-    # связь с событиями (только для участников)
     events = db.relationship('Event', backref='user', lazy=True)
+
 
 
 class Group(db.Model):

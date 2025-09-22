@@ -1,3 +1,4 @@
+-- Очистка
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS groups;
@@ -5,11 +6,13 @@ DROP TABLE IF EXISTS subjects;
 DROP TABLE IF EXISTS teachers;
 DROP TABLE IF EXISTS rooms;
 
+-- Группы
 CREATE TABLE groups (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Пользователи
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(150) UNIQUE NOT NULL,
@@ -19,21 +22,25 @@ CREATE TABLE users (
     FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Предметы
 CREATE TABLE subjects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Преподаватели
 CREATE TABLE teachers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Аудитории
 CREATE TABLE rooms (
     id INT AUTO_INCREMENT PRIMARY KEY,
     number VARCHAR(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- События
 CREATE TABLE events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
@@ -50,37 +57,37 @@ CREATE TABLE events (
     FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Группы (олимпиады)
+-- Данные: группы
 INSERT INTO groups (name) VALUES
 ('Олимпиада по информатике'),
 ('Олимпиада по математике'),
 ('Олимпиада по физике');
 
--- Пользователи (3 роли)
+-- Данные: пользователи
 INSERT INTO users (username, password, role, group_id) VALUES
 ('admin', 'admin_hashed', 'admin', 1),
-('organizer', 'organizer_hashed', 'organizer', 1),
-('participant', 'participant_hashed', 'participant', 2);
+('bob', 'bob_hashed', 'organizer', 1),
+('alice', 'alice_hashed', 'participant', 2);
 
--- Дисциплины
+-- Данные: предметы
 INSERT INTO subjects (name) VALUES
 ('Информатика'),
 ('Математика'),
 ('Физика');
 
--- Преподаватели / Жюри
+-- Данные: преподаватели
 INSERT INTO teachers (name) VALUES
 ('Иванов И.И.'),
 ('Петров П.П.'),
 ('Сидоров С.С.');
 
--- Аудитории
+-- Данные: аудитории
 INSERT INTO rooms (number) VALUES
 ('Ауд. 101'),
 ('Ауд. 202'),
 ('Ауд. 303');
 
--- События (этапы олимпиад)
+-- Данные: события
 INSERT INTO events (title, date, time, stage, user_id, subject_id, teacher_id, room_id) VALUES
 ('Отборочный тур по информатике', '2025-09-30', '10:00:00', 'Отборочный', 3, 1, 1, 1),
 ('Полуфинал по информатике', '2025-10-02', '11:00:00', 'Полуфинал', 3, 1, 1, 2),
