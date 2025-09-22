@@ -1,6 +1,7 @@
 from flask_login import UserMixin
 from extensions import db
 
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
@@ -17,7 +18,7 @@ class Group(db.Model):
     __tablename__ = 'groups'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
 
     users = db.relationship('User', backref='group', lazy=True)
 
@@ -48,10 +49,12 @@ class Event(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
-    date = db.Column(db.String(50), nullable=False)
-    time = db.Column(db.String(50), nullable=False)
 
-    stage = db.Column(db.String(100), nullable=True)  # новый атрибут: этап олимпиады
+    # исправлено: для MySQL используем Date и Time
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
+
+    stage = db.Column(db.String(100), nullable=True)  # этап олимпиады
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'))
