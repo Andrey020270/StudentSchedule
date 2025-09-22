@@ -139,6 +139,92 @@ def add_event():
     return render_template('add_event.html', subjects=subjects, teachers=teachers)
 
 
+@app.route('/add_event', methods=['GET', 'POST'])
+@login_required
+def add_event():
+    if current_user.role not in ["organizer", "admin"]:
+        flash("Недостаточно прав для добавления событий")
+        return redirect(url_for('schedule'))
+
+    if request.method == 'POST':
+        title = request.form['title']
+        date = request.form['date']
+        time = request.form['time']
+        stage = request.form['stage']
+        subject_id = request.form['subject']
+        teacher_id = request.form['teacher']
+        room_id = request.form['room']
+        user_id = request.form['user']
+
+        new_event = Event(
+            title=title,
+            date=date,
+            time=time,
+            stage=stage,
+            subject_id=subject_id,
+            teacher_id=teacher_id,
+            room_id=room_id,
+            user_id=user_id
+        )
+        db.session.add(new_event)
+        db.session.commit()
+        flash("Событие успешно добавлено")
+        return redirect(url_for('schedule'))
+
+    subjects = Subject.query.all()
+    teachers = Teacher.query.all()
+    from models import Room
+    rooms = Room.query.all()
+    users = User.query.filter_by(role="participant").all()
+    return render_template('add_event.html', subjects=subjects, teachers=teachers, rooms=rooms, users=users)
+
+
+@app.route('/edit_event/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_event(id):
+    if current_user.role not in ["organizer", "admin"]:
+        flash("Недостаточно прав для редактирования событий")
+        return redirect(url_for('schedule'))
+
+    event = Event.query.get_or_404(id)
+
+    if request.method == 'POST':
+        event.title = request.form['title']
+        event.date = request.form['date']
+        event.time = request.form['time']
+        event.stage = request.form['stage']
+        event.subject_id = request.form['subject']
+        event.teacher_id = request.form['teacher']
+        event.room_id = request.form['room']
+        event.user_id = request.form['user']
+
+        db.session.commit()
+        flash("Изменения сохранены")
+        return redirect(url_for('schedule'))
+
+    subjects = Subject.query.all()
+    teachers = Teacher.query.all()
+    from models import Room
+    rooms = Room.query.all()
+    users = User.query.filter_by(role="participant").all()
+    return render_template('edit_event.html', event=event, subjects=subjects, teachers=teachers, rooms=rooms,
+                           users=users)
+
+
+@app.route('/delete_event/<int:id>', methods=['POST', 'GET'])
+@login_required
+def delete_event(id):
+    if current_user.role != "admin":
+        flash("Недостаточно прав для удаления событий")
+        return redirect(url_for('schedule'))
+
+    event = Event.query.get_or_404(id)
+    db.session.delete(event)
+    db.session.commit()
+    flash("Событие удалено")
+    return redirect(url_for('schedule'))
+
+
 if __name__ == '__main__':
     url = "http://127.0.0.1:5000"
     print(f"Приложение доступно по адресу: {url}")

@@ -1,40 +1,41 @@
 {% extends 'base.html' %}
-{% block title %}Добавить событие{% endblock %}
+{% block title %}Редактировать событие{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h3 class="card-title text-center mb-4">Добавить событие</h3>
+                <h3 class="card-title text-center mb-4">Редактировать событие</h3>
                 <form method="POST">
                     <div class="mb-3">
                         <label class="form-label">Название</label>
-                        <input type="text" name="title" class="form-control" required>
+                        <input type="text" name="title" value="{{ event.title }}" class="form-control" required>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Дата</label>
-                            <input type="date" name="date" class="form-control" required>
+                            <input type="date" name="date" value="{{ event.date }}" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Время</label>
-                            <input type="time" name="time" class="form-control" required>
+                            <input type="time" name="time" value="{{ event.time }}" class="form-control" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Этап олимпиады</label>
                         <select name="stage" class="form-select" required>
-                            <option value="Отборочный">Отборочный</option>
-                            <option value="Полуфинал">Полуфинал</option>
-                            <option value="Заключительный">Заключительный</option>
-                            <option value="Консультация">Консультация</option>
+                            {% for st in ['Отборочный','Полуфинал','Заключительный','Консультация'] %}
+                                <option value="{{ st }}" {% if event.stage == st %}selected{% endif %}>{{ st }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Предмет</label>
                         <select name="subject" class="form-select" required>
                             {% for subj in subjects %}
-                                <option value="{{ subj.id }}">{{ subj.name }}</option>
+                                <option value="{{ subj.id }}" {% if event.subject_id == subj.id %}selected{% endif %}>
+                                    {{ subj.name }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -42,7 +43,9 @@
                         <label class="form-label">Преподаватель</label>
                         <select name="teacher" class="form-select" required>
                             {% for t in teachers %}
-                                <option value="{{ t.id }}">{{ t.name }}</option>
+                                <option value="{{ t.id }}" {% if event.teacher_id == t.id %}selected{% endif %}>
+                                    {{ t.name }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -50,7 +53,9 @@
                         <label class="form-label">Аудитория</label>
                         <select name="room" class="form-select" required>
                             {% for r in rooms %}
-                                <option value="{{ r.id }}">{{ r.number }}</option>
+                                <option value="{{ r.id }}" {% if event.room_id == r.id %}selected{% endif %}>
+                                    {{ r.number }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -58,12 +63,14 @@
                         <label class="form-label">Пользователь (участник)</label>
                         <select name="user" class="form-select" required>
                             {% for u in users %}
-                                <option value="{{ u.id }}">{{ u.username }}</option>
+                                <option value="{{ u.id }}" {% if event.user_id == u.id %}selected{% endif %}>
+                                    {{ u.username }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-success">➕ Создать событие</button>
+                        <button type="submit" class="btn btn-warning">💾 Сохранить изменения</button>
                         <a href="{{ url_for('schedule') }}" class="btn btn-secondary mt-2">↩ Назад</a>
                     </div>
                 </form>

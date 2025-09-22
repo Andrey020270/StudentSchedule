@@ -2,7 +2,7 @@
 {% block title %}Моё расписание{% endblock %}
 {% block content %}
 
-<h2>Моё расписание</h2>
+<h2 class="mb-4">Моё расписание</h2>
 
 <form method="GET" class="row g-3 mb-4">
     <div class="col-md-3">
@@ -33,21 +33,37 @@
             {% endfor %}
         </select>
     </div>
-    <div class="col-md-3 align-self-end">
+    <div class="col-md-3">
+        <label class="form-label">Этап</label>
+        <select name="stage" class="form-select">
+            <option value="all">Все</option>
+            {% for st in ['Отборочный','Полуфинал','Заключительный','Консультация'] %}
+                <option value="{{ st }}"
+                    {% if selected_stage == st %}selected{% endif %}>
+                    {{ st }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-12 text-end">
         <button type="submit" class="btn btn-primary">Фильтровать</button>
         <a href="{{ url_for('schedule') }}" class="btn btn-secondary">Сбросить</a>
     </div>
 </form>
 
-
-<table class="table table-bordered">
-    <thead>
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-light">
         <tr>
             <th>Дата</th>
             <th>Время</th>
+            <th>Этап</th>
+            <th>Название</th>
             <th>Предмет</th>
             <th>Аудитория</th>
             <th>Преподаватель</th>
+            {% if current_user.role in ['organizer','admin'] %}
+                <th class="text-center">Действия</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -55,13 +71,28 @@
         <tr>
             <td>{{ event.date }}</td>
             <td>{{ event.time }}</td>
+            <td>{{ event.stage or '—' }}</td>
+            <td>{{ event.title }}</td>
             <td>{{ event.subject.name if event.subject else '—' }}</td>
             <td>{{ event.room.number if event.room else '—' }}</td>
             <td>{{ event.teacher.name if event.teacher else '—' }}</td>
+            {% if current_user.role in ['organizer','admin'] %}
+                <td class="text-center">
+                    <a href="{{ url_for('edit_event', id=event.id) }}" class="btn btn-sm btn-warning me-1">
+                        ✏️ Редактировать
+                    </a>
+                    {% if current_user.role == 'admin' %}
+                        <form action="{{ url_for('delete_event', id=event.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Удалить событие?');">🗑 Удалить</button>
+                        </form>
+                    {% endif %}
+                </td>
+            {% endif %}
         </tr>
         {% else %}
         <tr>
-            <td colspan="5" class="text-center">Нет событий</td>
+            <td colspan="8" class="text-center">Нет событий</td>
         </tr>
         {% endfor %}
     </tbody>
