@@ -1,70 +1,95 @@
--- Удаляем старые данные (опционально)
-DELETE FROM events;
-DELETE FROM users;
-DELETE FROM groups;
-DELETE FROM subjects;
-DELETE FROM teachers;
-DELETE FROM rooms;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS subjects;
+DROP TABLE IF EXISTS teachers;
+DROP TABLE IF EXISTS rooms;
 
--- Группы
-INSERT INTO groups (id, name) VALUES
-(1, 'ИКБО-01-23'),
-(2, 'ИКБО-02-23'),
-(3, 'ПМИ-01-23');
+CREATE TABLE groups (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Пользователи (студенты)
-INSERT INTO users (id, username, password, group_id) VALUES
-(1, 'student01', 'pass123', 1),
-(2, 'student02', 'pass456', 2),
-(3, 'student03', 'pass789', 1);
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(150) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'participant',
+    group_id INT,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE subjects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE teachers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE rooms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    number VARCHAR(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    stage VARCHAR(100),
+    user_id INT NOT NULL,
+    subject_id INT,
+    teacher_id INT,
+    room_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE SET NULL,
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE SET NULL,
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Группы (олимпиады)
+INSERT INTO groups (name) VALUES
+('Олимпиада по информатике'),
+('Олимпиада по математике'),
+('Олимпиада по физике');
+
+-- Пользователи (3 роли)
+INSERT INTO users (username, password, role, group_id) VALUES
+('admin', 'admin_hashed', 'admin', 1),
+('organizer', 'organizer_hashed', 'organizer', 1),
+('participant', 'participant_hashed', 'participant', 2);
 
 -- Дисциплины
-INSERT INTO subjects (id, name) VALUES
-(1, 'Математика'),
-(2, 'Информатика'),
-(3, 'Физика'),
-(4, 'История'),
-(5, 'Английский язык');
+INSERT INTO subjects (name) VALUES
+('Информатика'),
+('Математика'),
+('Физика');
 
--- Преподаватели
-INSERT INTO teachers (id, name) VALUES
-(1, 'Иванов И.И.'),
-(2, 'Петров П.П.'),
-(3, 'Сидорова А.В.'),
-(4, 'Кузнецова Н.М.');
+-- Преподаватели / Жюри
+INSERT INTO teachers (name) VALUES
+('Иванов И.И.'),
+('Петров П.П.'),
+('Сидоров С.С.');
 
 -- Аудитории
-INSERT INTO rooms (id, number) VALUES
-(1, 'Ауд. 101'),
-(2, 'Ауд. 202'),
-(3, 'Ауд. 303'),
-(4, 'Онлайн');
+INSERT INTO rooms (number) VALUES
+('Ауд. 101'),
+('Ауд. 202'),
+('Ауд. 303');
 
--- События (занятия в расписании)
-INSERT INTO events (id, title, date, time, user_id, subject_id, teacher_id, room_id) VALUES
--- student01
-(1, 'Лекция по математике', '2025-09-01', '09:00', 1, 1, 1, 1),
-(2, 'Информатика — практика', '2025-09-01', '11:00', 1, 2, 2, 2),
-(3, 'Физика', '2025-09-02', '09:00', 1, 3, 3, 3),
--- student02
-(4, 'История', '2025-09-01', '10:00', 2, 4, 2, 2),
-(5, 'Информатика', '2025-09-02', '12:00', 2, 2, 1, 1),
--- student03
-(6, 'Английский язык', '2025-09-01', '14:00', 3, 5, 4, 4),
-(7, 'Математика', '2025-09-02', '08:30', 3, 1, 1, 1);
--- Дополнение к блоку INSERT INTO events
--- student01
-(8, 'История', '2025-09-03', '10:00', 1, 4, 2, 2),
-(9, 'Информатика', '2025-09-04', '13:00', 1, 2, 1, 1),
-(10, 'Физика — лабораторная', '2025-09-05', '09:30', 1, 3, 3, 3),
+-- События (этапы олимпиад)
+INSERT INTO events (title, date, time, stage, user_id, subject_id, teacher_id, room_id) VALUES
+('Отборочный тур по информатике', '2025-09-30', '10:00:00', 'Отборочный', 3, 1, 1, 1),
+('Полуфинал по информатике', '2025-10-02', '11:00:00', 'Полуфинал', 3, 1, 1, 2),
+('Финал по информатике', '2025-10-05', '12:00:00', 'Заключительный', 3, 1, 1, 3),
 
--- student02
-(11, 'Английский язык', '2025-09-03', '08:30', 2, 5, 4, 4),
-(12, 'История', '2025-09-04', '11:00', 2, 4, 2, 2),
-(13, 'Математика', '2025-09-05', '14:00', 2, 1, 1, 1),
+('Отборочный тур по математике', '2025-09-28', '09:00:00', 'Отборочный', 3, 2, 2, 1),
+('Консультация по математике', '2025-09-29', '14:00:00', 'Консультация', 3, 2, 2, 2),
+('Финал по математике', '2025-10-06', '13:00:00', 'Заключительный', 3, 2, 2, 3),
 
--- student03
-(14, 'Информатика — проект', '2025-09-03', '12:00', 3, 2, 2, 4),
-(15, 'Физика', '2025-09-04', '10:00', 3, 3, 3, 3),
-(16, 'История', '2025-09-05', '08:00', 3, 4, 2, 2);
-
+('Отборочный тур по физике', '2025-09-27', '15:00:00', 'Отборочный', 3, 3, 3, 1),
+('Полуфинал по физике', '2025-10-01', '16:00:00', 'Полуфинал', 3, 3, 3, 2),
+('Финал по физике', '2025-10-07', '10:00:00', 'Заключительный', 3, 3, 3, 3);
