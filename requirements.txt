@@ -1,5 +1,6 @@
 flask
-flask_sqlalchemy
-flask_login
+flask-login
+flask-sqlalchemy
+flask-wtf
 werkzeug
 pymysql
