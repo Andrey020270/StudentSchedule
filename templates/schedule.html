@@ -92,7 +92,7 @@
         </tr>
         {% else %}
         <tr>
-            <td colspan="8" class="text-center">Нет событий</td>
+            <td colspan="{{ 8 if current_user.role in ['organizer','admin'] else 7 }}" class="text-center">Нет событий</td>
         </tr>
         {% endfor %}
     </tbody>

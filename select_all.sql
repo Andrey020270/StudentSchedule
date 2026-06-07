@@ -23,6 +23,7 @@ SELECT
     r.number AS room,
     e.date,
     e.time,
+    e.stage,
     e.title
 FROM events e
 LEFT JOIN users u ON e.user_id = u.id

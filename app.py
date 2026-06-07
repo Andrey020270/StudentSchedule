@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
-from models import User, Event, Subject, Teacher
+from models import User, Event, Subject, Teacher, Room
 import datetime
 
 app = Flask(__name__)
@@ -80,12 +80,13 @@ def schedule():
     selected_date = request.args.get('date')
     selected_subject = request.args.get('subject')
     selected_teacher = request.args.get('teacher')
+    selected_stage = request.args.get('stage')
 
     # участник видит только свои события
     if current_user.role == "participant":
-        query = current_user.events
+        query = sorted(current_user.events, key=lambda event: (event.date, event.time))
     else:
-        query = Event.query.all()
+        query = Event.query.order_by(Event.date, Event.time).all()
 
     # Фильтрация
     if selected_date:
@@ -94,12 +95,15 @@ def schedule():
         query = [e for e in query if str(e.subject_id) == selected_subject]
     if selected_teacher and selected_teacher != 'all':
         query = [e for e in query if str(e.teacher_id) == selected_teacher]
+    if selected_stage and selected_stage != 'all':
+        query = [e for e in query if e.stage == selected_stage]
 
     return render_template('schedule.html', events=query,
                            subjects=subjects, teachers=teachers,
                            selected_date=selected_date,
                            selected_subject=selected_subject,
-                           selected_teacher=selected_teacher)
+                           selected_teacher=selected_teacher,
+                           selected_stage=selected_stage)
 
 
 @app.route('/add_event', methods=['GET', 'POST'])
@@ -145,7 +149,6 @@ def add_event():
 
     subjects = Subject.query.all()
     teachers = Teacher.query.all()
-    from models import Room
     rooms = Room.query.all()
     users = User.query.filter_by(role="participant").all()
     return render_template('add_event.html', subjects=subjects, teachers=teachers, rooms=rooms, users=users)
@@ -183,7 +186,6 @@ def edit_event(id):
 
     subjects = Subject.query.all()
     teachers = Teacher.query.all()
-    from models import Room
     rooms = Room.query.all()
     users = User.query.filter_by(role="participant").all()
     return render_template(

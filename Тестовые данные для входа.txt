@@ -2,6 +2,21 @@
 
 Логины и пароли пользователей после инициализации базы:
 
-1) admin / admin123   (роль: Admin — полный доступ)
-2) bob / bob123       (роль: Organizer — добавление и редактирование)
-3) alice / alice123   (роль: Participant — только просмотр)
+1) admin / admin123       (роль: Admin - полный доступ, видит все 12 событий)
+2) bob / bob123           (роль: Organizer - добавление и редактирование, видит все 12 событий)
+3) svetlana / svetlana123 (роль: Organizer - добавление и редактирование, видит все 12 событий)
+4) alice / alice123       (роль: Participant - только просмотр, видит 10 событий)
+5) ivan / ivan123         (роль: Participant - только просмотр)
+6) maria / maria123       (роль: Participant - только просмотр)
+7) sergey / sergey123     (роль: Participant - только просмотр)
+8) elena / elena123       (роль: Participant - только просмотр)
+9) dmitry / dmitry123     (роль: Participant - только просмотр)
+10) anna / anna123        (роль: Participant - только просмотр)
+
+После запуска init_db.py в основных таблицах базы:
+- groups: 10 записей
+- users: 10 записей
+- subjects: 10 записей
+- teachers: 10 записей
+- rooms: 10 записей
+- events: 12 записей
